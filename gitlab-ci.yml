@@ -1,0 +1,38 @@
+stages:
+  - prepare
+  - build
+  - deploy
+
+prepare:
+  stage: prepare
+  tags:
+    - shell
+  script:
+    - echo "Prepare envariments"
+    - arduino-cli config init --overwrite
+    - arduino-cli core update-index --additional-urls http://arduino.esp8266.com/stable/package_esp8266com_index.json
+    - arduino-cli core install esp8266:esp8266 --additional-urls http://arduino.esp8266.com/stable/package_esp8266com_index.json 
+    - echo "Install libs"
+    - arduino-cli lib install "Adafruit NeoPixel"
+
+
+strandtest_wheel:
+  stage: build
+  tags:
+    - shell
+  needs:
+    - prepare
+  before_script:
+    - if [ -z ${BUILD_TYPE+x} ]; then B_NAME="master"; else B_NAME="$BUILD_TYPE"; fi
+    - sed -i '1s/^/#define BUILD_SHA "'${CI_COMMIT_SHA}'" \n/' strandtest_wheel/strandtest_wheel.ino
+    - sed -i '1s/^/#define BUILDTAG "'$B_NAME'" \n/' strandtest_wheel/strandtest_wheel.ino
+    - sed -i '1s/^/#define BUILDINFO "Builded at '${CI_JOB_STARTED_AT}', tag '$B_NAME', job id '${CI_JOB_ID}'" \n/' strandtest_wheel/strandtest_wheel.ino
+  script:
+    - arduino-cli compile --fqbn esp8266:esp8266:d1 strandtest_wheel/strandtest_wheel.ino --output-dir ./
+  artifacts:
+    untracked: true
+#    paths:
+#      - "*.*"
+#      - "*.*.*"
+    expire_in: 7 week
+
