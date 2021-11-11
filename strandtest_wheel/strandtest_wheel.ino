@@ -261,7 +261,7 @@ void make_update()
     ESPhttpUpdate.onProgress(update_progress);
     ESPhttpUpdate.onError(update_error);
 
-    t_httpUpdate_return ret = ESPhttpUpdate.update(client, "http://dev.a1mc.ru/rom/kir/strandtest_wheel.ino.bin");
+    t_httpUpdate_return ret = ESPhttpUpdate.update(client, "http://dev.a1mc.ru/rom/kir/index.php");
     // Or:
     //t_httpUpdate_return ret = ESPhttpUpdate.update(client, "server", 80, "file.bin");
 
