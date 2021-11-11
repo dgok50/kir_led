@@ -29,8 +29,8 @@ ESP8266WiFiMulti WiFiMulti;
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(240, 4, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(243, 4, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(240, PIN, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
