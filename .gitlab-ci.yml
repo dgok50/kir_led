@@ -36,3 +36,20 @@ strandtest_wheel:
 #      - "*.*.*"
     expire_in: 7 week
 
+deploy:
+  stage: deploy
+  tags:
+    - shell
+  environment:
+    name: Staging
+    url: "$FW_URL"
+  before_script:
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh-add <(echo "$PRIVATE_KEY")
+    - if [ -z ${BUILD_TYPE+x} ]; then B_NAME="$CI_COMMIT_BRANCH"; else B_NAME="$BUILD_TYPE"; fi
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nginx@$FW_SERVER "mkdir -p /var/www/dev/rom/kir/"
+    - scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P22 $CI_PROJECT_DIR/*.*.bin nginx@$FW_SERVER:/var/www/dev/kir/
+
