@@ -38,6 +38,7 @@ Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
 // on a live circuit...if you must, connect GND first.
 
 void setup() {
+  Serial.begin(9600);
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
   #if defined (__AVR_ATtiny85__)
     if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
@@ -58,9 +59,10 @@ void setup() {
   {
     if(millis() > 30000)
       break;
-
+    yield();
     strip.setPixelColor((millis()/1000), strip.Color(0, 0, 50));
     strip.show();
+    
   }
 
 }
