@@ -51,5 +51,5 @@ deploy:
     - ssh-add <(echo "$PRIVATE_KEY")
     - if [ -z ${BUILD_TYPE+x} ]; then B_NAME="$CI_COMMIT_BRANCH"; else B_NAME="$BUILD_TYPE"; fi
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nginx@$FW_SERVER "mkdir -p /var/www/dev/rom/kir/"
-    - scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P22 $CI_PROJECT_DIR/*.*.bin nginx@$FW_SERVER:/var/www/dev/kir/
+    - scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P22 $CI_PROJECT_DIR/*.*.bin nginx@$FW_SERVER:/var/www/dev/rom/kir/
 
