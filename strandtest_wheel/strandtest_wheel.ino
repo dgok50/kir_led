@@ -55,16 +55,25 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(APSSID, APPSK);
 
-  while((WiFiMulti.run() == WL_CONNECTED))
+  
+    strip.setPixelColor(61, strip.Color(0, 50, 0));
+    strip.show();
+  while((WiFiMulti.run() != WL_CONNECTED))
   {
-    if(millis() > 30000)
+    if(millis() > 60000)
       break;
     yield();
     strip.setPixelColor((millis()/1000), strip.Color(0, 0, 50));
     strip.show();
     
   }
-
+  if((WiFiMulti.run() == WL_CONNECTED)) {
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  make_update();
+  }
 }
 
 void loop() {
