@@ -151,6 +151,30 @@ void rainbow(uint8_t wait) {
   }
 }
 
+void fill_full(uint32_t c, uint16_t first, uint16_t count) {
+  uint16_t i, end, numLEDs = numPixels_full();
+
+  if (first >= numLEDs) {
+    return; // If first LED is past end of strip, nothing to do
+  }
+
+  // Calculate the index ONE AFTER the last pixel to fill
+  if (count == 0) {
+    // Fill to end of strip
+    end = numLEDs;
+  } else {
+    // Ensure that the loop won't go past the last pixel
+    end = first + count;
+    if (end > numLEDs)
+      end = numLEDs;
+  }
+
+  for (i = first; i < end; i++) {
+    this->setPixelColor(i, c);
+  }
+
+}
+
 // Slightly different, this makes the rainbow equally distributed throughout
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
@@ -221,17 +245,24 @@ uint32_t Wheel(byte WheelPos) {
 
 void update_started() {
   Serial.println("CALLBACK:  HTTP update process started");
+  fill_full(strip.Color(0, 0, 64), 0, numPixels_full());
 }
 
 void update_finished() {
   Serial.println("CALLBACK:  HTTP update process finished");
+  fill_full(strip.Color(64, 128, 0), 0, numPixels_full());
+
 }
 
 void update_progress(int cur, int total) {
+
+  fill_full(strip.Color(0, 128, 0), 0, map(cur, 0, total, 0, strip.numPixels_full()));
   Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
 }
 
 void update_error(int err) {
+
+  fill_full(strip.Color(128, 0, 0), 0, numPixels_full());
   Serial.printf("CALLBACK:  HTTP update fatal error code %d\n", err);
 }
 
