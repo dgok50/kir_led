@@ -168,9 +168,10 @@ void fill_full(uint32_t c, uint16_t first, uint16_t count) {
     if (end > numLEDs)
       end = numLEDs;
   }
-
+  yield();
   for (i = first; i < end; i++) {
     this->setPixelColor(i, c);
+    yield();
   }
 
 }
@@ -256,7 +257,7 @@ void update_finished() {
 
 void update_progress(int cur, int total) {
 
-  fill_full(strip.Color(0, 128, 0), 0, map(cur, 0, total, 0, strip.numPixels_full()));
+  fill_full(strip.Color(0, 128, 0), 0, map(cur, 0, total, 0, numPixels_full()));
   Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
 }
 
