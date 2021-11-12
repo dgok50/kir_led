@@ -296,7 +296,7 @@ void make_update()
 
 
 void service_blink(uint32_t c){
-    led_delim = numPixels_full()/10;
+    int led_delim = numPixels_full()/10;
     yield();
     fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
     show_full();
