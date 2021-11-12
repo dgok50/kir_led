@@ -170,7 +170,7 @@ void fill_full(uint32_t c, uint16_t first, uint16_t count) {
   }
   yield();
   for (i = first; i < end; i++) {
-    this->setPixelColor(i, c);
+    setPixelColor_full(i, c);
     yield();
   }
 
