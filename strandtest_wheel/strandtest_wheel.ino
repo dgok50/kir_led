@@ -103,30 +103,14 @@ void loop() {
 
 // Fill the dots one after the other with a color
 void colorWipe(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<(strip.numPixels()+strip2.numPixels()); i++) {
-  if(i<strip.numPixels()){
-    strip.setPixelColor((strip.numPixels()-1)-i, c);
-    strip.show();
-  }
-  if(i>strip.numPixels())
-  {
-    strip2.setPixelColor(i-(strip.numPixels()+1), c);
-    strip2.show();
-  }
+  for(uint16_t i=0; i<(numPixels_full()); i++) {
+    setPixelColor_full(i, c);
     delay(wait);
   }
 }
 void colorWipe_inv(uint32_t c, uint8_t wait) {
-  for(uint16_t i=(strip.numPixels()+strip2.numPixels()); i>0; i--) {
-  if(i<strip.numPixels()){
-    strip.setPixelColor((strip.numPixels()-1)-i, c);
-    strip.show();
-  }
-  if(i>strip.numPixels())
-  {
-    strip2.setPixelColor(i-(strip.numPixels()+1), c);
-    strip2.show();
-  }
+  for(uint16_t i=(numPixels_full()); i>0; i--) {
+    setPixelColor_full(i, c);
     delay(wait);
   }
 }
