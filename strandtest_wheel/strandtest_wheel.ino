@@ -316,7 +316,7 @@ void service_blink(uint32_t c){
 
 void do_mode()
 {
-    switch(globe_mode) {
+    switch(global_mode) {
      case 0:
         yield();
         break;
