@@ -21,6 +21,10 @@ ESP8266WiFiMulti WiFiMulti;
 
 #define PIN 2
 
+uint32_t t_color = 0;
+
+unsigned int global_mode = 1;
+
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
 // Parameter 3 = pixel type flags, add together as needed:
@@ -77,28 +81,8 @@ void setup() {
 }
 
 void loop() {
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 2); // Red
-  colorWipe_inv(strip.Color(255, 0, 0), 2); // Red
-  delay(1000);
-  colorWipe(strip.Color(0, 255, 0), 2); // Green
-  delay(1000);
-  colorWipe(strip.Color(0, 0, 255), 2); // Blue
-  delay(1000);
-  colorWipe(strip.Color(255, 255, 255), 10); // White
-  delay(10000);
-  colorWipe(strip.Color(0, 0, 0), 10); // Off
-  delay(1000);
-//colorWipe(strip.Color(0, 0, 0, 255), 50); // White RGBW
-  // Send a theater pixel chase in...
-  theaterChase(strip.Color(127, 127, 127), 50); // White
-  theaterChase(strip2.Color(127, 127, 127), 50); // White
-  theaterChase(strip.Color(127, 0, 0), 50); // Red
-  theaterChase(strip.Color(0, 0, 127), 50); // Blue
-
-  rainbow(20);
-  rainbowCycle(20);
-  theaterChaseRainbow(50);
+  do_mode();
+  yield();
 }
 
 // Fill the dots one after the other with a color
@@ -269,7 +253,6 @@ void update_error(int err) {
 
 void make_update()
 {
-
   if ((WiFiMulti.run() == WL_CONNECTED)) {
 
     WiFiClient client;
@@ -295,15 +278,90 @@ void make_update()
     switch (ret) {
       case HTTP_UPDATE_FAILED:
         Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+        service_blink(strip.Color(255, 0, 0));
         break;
 
       case HTTP_UPDATE_NO_UPDATES:
         Serial.println("HTTP_UPDATE_NO_UPDATES");
+        service_blink(strip.Color(0, 0, 255));
         break;
 
       case HTTP_UPDATE_OK:
         Serial.println("HTTP_UPDATE_OK");
+        service_blink(strip.Color(0, 255, 0));
         break;
     }
   }
+}
+
+
+void service_blink(uint32_t c){
+    led_delim = numPixels_full()/10;
+    yield();
+    fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
+    show_full();
+    delay(1000);
+    fill_full(c, led_delim, led_delim+led_delim);
+    show_full();
+    delay(1000);
+    fill_full(strip.Color(0, 0, 0), led_delim, led_delim+led_delim);
+    show_full();
+    delay(1000);
+    fill_full(c, led_delim, led_delim+led_delim);
+    show_full();
+    delay(1000);
+    fill_full(strip.Color(0, 0, 0), led_delim, led_delim+led_delim);
+    show_full();
+}
+
+void do_mode()
+{
+    switch(globe_mode) {
+     case 0:
+        yield();
+        break;
+     case 1:
+        rainbow(20);
+        break;
+     case 2:
+        rainbowCycle(20);
+        break;
+     case 3:
+        theaterChaseRainbow(50);
+        break;
+     case 4:
+        theaterChase(t_color, 50); // White
+        break;
+     case 5:
+        yield();
+        break;
+
+    }
+}
+
+void set_mode(unsigned int mode_new)
+{
+    switch(mode_new) {
+     case 0:
+        fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
+        show_full();
+        break;
+     case 1:
+        rainbow(20);
+        break;
+     case 2:
+        rainbowCycle(20);
+        break;
+     case 3:
+        theaterChaseRainbow(50);
+        break;
+     case 4:
+        theaterChase(t_color, 50); // White
+        break;
+     case 5:
+        colorWipe(t_color, 2); // Blue
+        break;
+    }
+    global_mode = mode_new;
+
 }
