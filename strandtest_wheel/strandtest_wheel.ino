@@ -49,6 +49,12 @@ void setup() {
   #endif
   // End of trinket special code
 
+#if defined(BUILDINFO)
+    Serial.println(F(BUILDINFO));
+    Serial.println(F(BUILD_SHA));
+    Serial.println(F(BUILDTAG));
+#endif
+
   strip.begin();
   strip.setBrightness(255);
   strip.show(); // Initialize all pixels to 'off'
