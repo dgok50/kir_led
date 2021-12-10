@@ -8,12 +8,18 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
 
+#include <aREST.h>
+
 #ifndef APSSID
 #define APSSID "SLOW"
 #define APPSK  "kir12345"
 #endif
 
 ESP8266WiFiMulti WiFiMulti;
+
+aREST rest = aREST();
+
+WiFiServer server(8080);
 
 #ifdef __AVR__
   #include <avr/power.h>
@@ -41,6 +47,14 @@ Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(247, STR1, NEO_GRB + NEO_KHZ800);
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
+
+int set_mode_r(String command) {
+
+  // Get state from command
+  int state = command.toInt();
+
+  return set_mode(state);
+}
 
 void setup() {
   Serial.begin(9600);
@@ -85,6 +99,15 @@ void setup() {
   Serial.println(WiFi.localIP());
   make_update();
   }
+  rest.variable("global_mode",&global_mode);
+  rest.variable("t_color",&t_color);
+
+  rest.function("set_mode",set_mode_r);
+
+  // Give name & ID to the device (ID should be 6 characters long)
+  rest.set_id("1");
+  rest.set_name("esp_kir_led");
+
 }
 
 void loop() {
@@ -346,8 +369,9 @@ void do_mode()
     }
 }
 
-void set_mode(unsigned int mode_new)
+int set_mode(unsigned int mode_new)
 {
+int ret = 0;
     switch(mode_new) {
      case 0:
         fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
@@ -368,7 +392,10 @@ void set_mode(unsigned int mode_new)
      case 5:
         colorWipe(t_color, 2); // Blue
         break;
+     default:
+        ret = 1;
     }
-    global_mode = mode_new;
-
+    if(ret == 0)
+        global_mode = mode_new;
+    return ret;
 }
