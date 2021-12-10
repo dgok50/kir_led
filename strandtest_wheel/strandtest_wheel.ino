@@ -97,6 +97,7 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  WiFi.hostname("ESP_LED");
   make_update();
   }
   rest.variable("global_mode",&global_mode);
