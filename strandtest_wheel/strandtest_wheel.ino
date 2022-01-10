@@ -314,7 +314,7 @@ void make_update()
 
       case HTTP_UPDATE_NO_UPDATES:
         Serial.println("HTTP_UPDATE_NO_UPDATES");
-        service_blink(strip.Color(0, 0, 255));
+        //service_blink(strip.Color(0, 0, 255));
         break;
 
       case HTTP_UPDATE_OK:
