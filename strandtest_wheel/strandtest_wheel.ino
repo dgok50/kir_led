@@ -32,6 +32,8 @@ uint32_t t_color = 0;
 
 unsigned int global_mode = 2;
 
+WiFiServer server(8080);
+
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
 // Parameter 3 = pixel type flags, add together as needed:
