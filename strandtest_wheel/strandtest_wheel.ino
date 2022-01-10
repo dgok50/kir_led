@@ -113,6 +113,14 @@ void setup() {
 
 void loop() {
   do_mode();
+    WiFiClient client = server.available();
+    if (!client) {
+      return;
+    }
+    while(!client.available()){
+      do_mode();
+    }
+    rest.handle(client);
   yield();
 }
 
