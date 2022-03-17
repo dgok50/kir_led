@@ -22,7 +22,7 @@ aREST rest = aREST();
 WiFiServer server(8080);
 
 #ifdef __AVR__
-  #include <avr/power.h>
+#include <avr/power.h>
 #endif
 
 #define STR1 2
@@ -56,102 +56,109 @@ int set_mode_r(String command) {
   return set_mode(state);
 }
 
+int reboot(String com) {
+  ESP.restart();
+}
+
 void setup() {
   Serial.begin(9600);
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-  #if defined (__AVR_ATtiny85__)
-    if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
-  #endif
+#if defined (__AVR_ATtiny85__)
+  if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
+#endif
   // End of trinket special code
 
 #if defined(BUILDINFO)
-    Serial.println(F(BUILDINFO));
-    Serial.println(F(BUILD_SHA));
-    Serial.println(F(BUILDTAG));
+  Serial.println(F(BUILDINFO));
+  Serial.println(F(BUILD_SHA));
+  Serial.println(F(BUILDTAG));
 #endif
 
   strip.begin();
   strip.setBrightness(255);
   strip.show(); // Initialize all pixels to 'off'
-//  strip2.begin();
-//  strip2.setBrightness(255);
-//  strip2.show(); // Initialize all pixels to 'off'
-
+  //  strip2.begin();
+  //  strip2.setBrightness(255);
+  //  strip2.show(); // Initialize all pixels to 'off'
+  fill_full(strip.Color(0, 10, 10), 0, numPixels_full());
+  strip.show();
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(APSSID, APPSK);
 
-  
+
   strip.setPixelColor(61, strip.Color(0, 50, 0));
   strip.show();
-  while((WiFiMulti.run() != WL_CONNECTED))
+  while ((WiFiMulti.run() != WL_CONNECTED))
   {
-    if(millis() > 60000)
+    if (millis() > 60000)
       break;
     yield();
-    strip.setPixelColor((millis()/1000), strip.Color(0, 0, 50));
+    strip.setPixelColor((millis() / 1000), strip.Color(0, 0, 50));
     strip.show();
-    
-  }
-  if((WiFiMulti.run() == WL_CONNECTED)) {
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  WiFi.hostname("ESP_LED");
-  make_update();
-  }
-  rest.variable("global_mode",&global_mode);
-  rest.variable("t_color",&t_color);
 
-  rest.function("set_mode",set_mode_r);
+  }
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    WiFi.hostname("ESP_LED");
+    make_update();
+  }
+  rest.variable("global_mode", &global_mode);
+  rest.variable("t_color", &t_color);
+
+  rest.function("set_mode", set_mode_r);
+
+  rest.function("reboot", reboot);
 
   // Give name & ID to the device (ID should be 6 characters long)
   rest.set_id("1");
   rest.set_name("esp_kir_led");
 
+  server.begin();
 }
 
 void loop() {
   do_mode();
-    WiFiClient client = server.available();
-    if (!client) {
-      return;
+  WiFiClient client = server.available();
+  if (client) {
+    if (client.available()) {
+      rest.handle(client);
+      delay(100);
     }
-    while(!client.available()){
-      do_mode();
-    }
-    rest.handle(client);
+  }
   yield();
 }
 
 // Fill the dots one after the other with a color
 void colorWipe(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<(numPixels_full()); i++) {
+  for (uint16_t i = 0; i < (numPixels_full()); i++) {
     setPixelColor_full(i, c);
     delay(wait);
   }
 }
 void colorWipe_inv(uint32_t c, uint8_t wait) {
-  for(uint16_t i=(numPixels_full()); i>0; i--) {
+  for (uint16_t i = (numPixels_full()); i > 0; i--) {
     setPixelColor_full(i, c);
     delay(wait);
   }
 }
-void setPixelColor_full(uint16_t i, uint32_t c){
+void setPixelColor_full(uint16_t i, uint32_t c) {
   //if(i<strip.numPixels()){
-    strip.setPixelColor(i, c);
+  strip.setPixelColor(i, c);
   //}
   //if(i>strip.numPixels())
   //{
   //  strip2.setPixelColor(i-(strip.numPixels()+1), c);
   //}
 }
-void show_full(){
-    strip.show();
-    //strip2.show();
+void show_full() {
+  strip.show();
+  //strip2.show();
 }
-unsigned int numPixels_full(){
- return strip.numPixels();
+unsigned int numPixels_full() {
+  return strip.numPixels();
 }
 //
 //void colorWipe2(uint32_t c, uint8_t wait) {
@@ -165,9 +172,9 @@ unsigned int numPixels_full(){
 void rainbow(uint8_t wait) {
   uint16_t i, j;
 
-  for(j=0; j<256; j++) {
-    for(i=0; i<numPixels_full(); i++) {
-      setPixelColor_full(i, Wheel((i+j) & 255));
+  for (j = 0; j < 256; j++) {
+    for (i = 0; i < numPixels_full(); i++) {
+      setPixelColor_full(i, Wheel((i + j) & 255));
     }
     show_full();
     delay(wait);
@@ -203,8 +210,8 @@ void fill_full(uint32_t c, uint16_t first, uint16_t count) {
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< numPixels_full(); i++) {
+  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+    for (i = 0; i < numPixels_full(); i++) {
       setPixelColor_full(i, Wheel(((i * 256 / numPixels_full()) + j) & 255));
     }
     show_full();
@@ -214,17 +221,17 @@ void rainbowCycle(uint8_t wait) {
 
 //Theatre-style crawling lights.
 void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < numPixels_full(); i=i+3) {
-        setPixelColor_full(i+q, c);    //turn every third pixel on
+  for (int j = 0; j < 10; j++) { //do 10 cycles of chasing
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < numPixels_full(); i = i + 3) {
+        setPixelColor_full(i + q, c);  //turn every third pixel on
       }
       show_full();
 
       delay(wait);
 
-      for (uint16_t i=0; i < numPixels_full(); i=i+3) {
-        setPixelColor_full(i+q, 0);        //turn every third pixel off
+      for (uint16_t i = 0; i < numPixels_full(); i = i + 3) {
+        setPixelColor_full(i + q, 0);      //turn every third pixel off
       }
     }
   }
@@ -232,17 +239,17 @@ void theaterChase(uint32_t c, uint8_t wait) {
 
 //Theatre-style crawling lights with rainbow effect
 void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < numPixels_full(); i=i+3) {
-        setPixelColor_full(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < numPixels_full(); i = i + 3) {
+        setPixelColor_full(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
       }
       show_full();
 
       delay(wait);
 
-      for (uint16_t i=0; i < numPixels_full(); i=i+3) {
-        setPixelColor_full(i+q, 0);        //turn every third pixel off
+      for (uint16_t i = 0; i < numPixels_full(); i = i + 3) {
+        setPixelColor_full(i + q, 0);      //turn every third pixel off
       }
     }
   }
@@ -252,10 +259,10 @@ void theaterChaseRainbow(uint8_t wait) {
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
+  if (WheelPos < 85) {
     return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
-  if(WheelPos < 170) {
+  if (WheelPos < 170) {
     WheelPos -= 85;
     return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
@@ -331,77 +338,77 @@ void make_update()
 }
 
 
-void service_blink(uint32_t c){
-    int led_delim = numPixels_full()/10;
-    yield();
-    fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
-    show_full();
-    delay(1000);
-    fill_full(c, led_delim, led_delim+led_delim);
-    show_full();
-    delay(1000);
-    fill_full(strip.Color(0, 0, 0), led_delim, led_delim+led_delim);
-    show_full();
-    delay(1000);
-    fill_full(c, led_delim, led_delim+led_delim);
-    show_full();
-    delay(1000);
-    fill_full(strip.Color(0, 0, 0), led_delim, led_delim+led_delim);
-    show_full();
+void service_blink(uint32_t c) {
+  int led_delim = numPixels_full() / 10;
+  yield();
+  fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
+  show_full();
+  delay(1000);
+  fill_full(c, led_delim, led_delim + led_delim);
+  show_full();
+  delay(1000);
+  fill_full(strip.Color(0, 0, 0), led_delim, led_delim + led_delim);
+  show_full();
+  delay(1000);
+  fill_full(c, led_delim, led_delim + led_delim);
+  show_full();
+  delay(1000);
+  fill_full(strip.Color(0, 0, 0), led_delim, led_delim + led_delim);
+  show_full();
 }
 
 void do_mode()
 {
-    switch(global_mode) {
-     case 0:
-        yield();
-        break;
-     case 1:
-        rainbow(20);
-        break;
-     case 2:
-        rainbowCycle(20);
-        break;
-     case 3:
-        theaterChaseRainbow(50);
-        break;
-     case 4:
-        theaterChase(t_color, 50); // White
-        break;
-     case 5:
-        yield();
-        break;
+  switch (global_mode) {
+    case 0:
+      yield();
+      break;
+    case 1:
+      rainbow(20);
+      break;
+    case 2:
+      rainbowCycle(20);
+      break;
+    case 3:
+      theaterChaseRainbow(50);
+      break;
+    case 4:
+      theaterChase(t_color, 50); // White
+      break;
+    case 5:
+      yield();
+      break;
 
-    }
+  }
 }
 
 int set_mode(unsigned int mode_new)
 {
-int ret = 0;
-    switch(mode_new) {
-     case 0:
-        fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
-        show_full();
-        break;
-     case 1:
-        rainbow(20);
-        break;
-     case 2:
-        rainbowCycle(20);
-        break;
-     case 3:
-        theaterChaseRainbow(50);
-        break;
-     case 4:
-        theaterChase(t_color, 50); // White
-        break;
-     case 5:
-        colorWipe(t_color, 2); // Blue
-        break;
-     default:
-        ret = 1;
-    }
-    if(ret == 0)
-        global_mode = mode_new;
-    return ret;
+  int ret = 0;
+  switch (mode_new) {
+    case 0:
+      fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
+      show_full();
+      break;
+    case 1:
+      rainbow(20);
+      break;
+    case 2:
+      rainbowCycle(20);
+      break;
+    case 3:
+      theaterChaseRainbow(50);
+      break;
+    case 4:
+      theaterChase(t_color, 50); // White
+      break;
+    case 5:
+      colorWipe(t_color, 2); // Blue
+      break;
+    default:
+      ret = 1;
+  }
+  if (ret == 0)
+    global_mode = mode_new;
+  return ret;
 }
