@@ -79,11 +79,7 @@ void setup() {
 
   strip.begin();
   strip.setBrightness(255);
-  strip.show(); // Initialize all pixels to 'off'
-  //  strip2.begin();
-  //  strip2.setBrightness(255);
-  //  strip2.show(); // Initialize all pixels to 'off'
-  fill_full(strip.Color(0, 10, 10), 0, numPixels_full());
+  fill_full(strip.Color(0, 255, 255), 0, numPixels_full());
   strip.show();
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(APSSID, APPSK);
@@ -177,7 +173,7 @@ unsigned int numPixels_full() {
 void rainbow(uint8_t wait) {
   uint16_t i, j;
 
-  for (j = 0; j < 256; j++) {
+  for (j = 255; j > 0; j--) {
     for (i = 0; i < numPixels_full(); i++) {
       setPixelColor_full(i, Wheel((i + j) & 255));
     }
