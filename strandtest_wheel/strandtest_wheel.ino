@@ -58,6 +58,7 @@ int set_mode_r(String command) {
 
 int reboot(String com) {
   ESP.restart();
+  return 1;
 }
 
 void setup() {
@@ -274,27 +275,30 @@ uint32_t Wheel(byte WheelPos) {
 void update_started() {
   Serial.println("CALLBACK:  HTTP update process started");
   fill_full(strip.Color(0, 0, 64), 0, numPixels_full());
+  show_full();
 }
 
 void update_finished() {
   Serial.println("CALLBACK:  HTTP update process finished");
   fill_full(strip.Color(64, 128, 0), 0, numPixels_full());
+  show_full();
 
 }
 
 void update_progress(int cur, int total) {
 
   fill_full(strip.Color(0, 128, 0), 0, map(cur, 0, total, 0, numPixels_full()));
+  show_full();
   Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
 }
 
 void update_error(int err) {
-
   fill_full(strip.Color(128, 0, 0), 0, numPixels_full());
+  show_full();
   Serial.printf("CALLBACK:  HTTP update fatal error code %d\n", err);
 }
 
-void make_update()
+void make_update() //Проверка и обновление в случае наличия
 {
   if ((WiFiMulti.run() == WL_CONNECTED)) {
 
@@ -338,7 +342,7 @@ void make_update()
 }
 
 
-void service_blink(uint32_t c) {
+void service_blink(uint32_t c) { //Сервисное мигание для отображения статуса
   int led_delim = numPixels_full() / 10;
   yield();
   fill_full(strip.Color(0, 0, 0), 0, numPixels_full());
@@ -357,7 +361,7 @@ void service_blink(uint32_t c) {
   show_full();
 }
 
-void do_mode()
+void do_mode() //Обработчик эффектов
 {
   switch (global_mode) {
     case 0:
@@ -382,7 +386,7 @@ void do_mode()
   }
 }
 
-int set_mode(unsigned int mode_new)
+int set_mode(unsigned int mode_new) //Задать тип эффекта
 {
   int ret = 0;
   switch (mode_new) {
