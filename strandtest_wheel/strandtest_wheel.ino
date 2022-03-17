@@ -30,6 +30,8 @@ WiFiServer server(8080);
 
 uint32_t t_color = 0;
 
+bool reboot_flag = false;
+
 unsigned int global_mode = 1;
 
 // Parameter 1 = number of pixels in strip
@@ -41,7 +43,6 @@ unsigned int global_mode = 1;
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(492, STR2, NEO_GRB + NEO_KHZ800);
-//Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(247, STR1, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -57,6 +58,7 @@ int set_mode_r(String command) {
 }
 
 int reboot(String com) {
+  reboot_flag = true;
   ESP.restart();
   return 1;
 }
@@ -130,6 +132,8 @@ void loop() {
     }
   }
   yield();
+  if(reboot_flag == true)
+    ESP.restart();
 }
 
 // Fill the dots one after the other with a color
