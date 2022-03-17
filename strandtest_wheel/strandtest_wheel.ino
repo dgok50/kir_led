@@ -64,30 +64,27 @@ int reboot(String com) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); //Инициализация uart порта
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
 #if defined (__AVR_ATtiny85__)
   if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
 #endif
   // End of trinket special code
 
-#if defined(BUILDINFO)
+#if defined(BUILDINFO) //Вывод информации о сборку CI/CD
   Serial.println(F(BUILDINFO));
   Serial.println(F(BUILD_SHA));
   Serial.println(F(BUILDTAG));
 #endif
 
-  strip.begin();
-  strip.setBrightness(255);
-  fill_full(strip.Color(0, 10, 10), 0, numPixels_full());
-  strip.show();
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP(APSSID, APPSK);
+  strip.begin(); //Инициализация ленты
+  strip.setBrightness(255); //Установка яркости
+  fill_full(strip.Color(0, 10, 10), 0, numPixels_full()); //Установка голубово света на всю ленту
+  strip.show(); //Вывод цвета на ленту
+  WiFi.mode(WIFI_STA); //Установлени режима клиента
+  WiFiMulti.addAP(APSSID, APPSK); //Уставка названия сети и пароля для подключения
 
-
-  strip.setPixelColor(61, strip.Color(0, 50, 0));
-  strip.show();
-  while ((WiFiMulti.run() != WL_CONNECTED))
+  while ((WiFiMulti.run() != WL_CONNECTED))//Ожидаем 1 минуту подключение к точке доступа
   {
     if (millis() > 60000)
       break;
@@ -96,7 +93,7 @@ void setup() {
     strip.show();
 
   }
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
+  if ((WiFiMulti.run() == WL_CONNECTED)) { //Если подключение произошло выводим IP и задаём имя хоста
     Serial.println("");
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
@@ -104,31 +101,32 @@ void setup() {
     WiFi.hostname("ESP_LED");
     make_update();
   }
+  //Устанавливаем переменные видные через REST
   rest.variable("global_mode", &global_mode);
   rest.variable("t_color", &t_color);
-
+  //Задаём функциии для REST
   rest.function("set_mode", set_mode_r);
-
   rest.function("reboot", reboot);
 
-  // Give name & ID to the device (ID should be 6 characters long)
+  // Устанавливаем имя устройства & ID для отвев по REST (ID Должем быть не более 6 символов в длинну)
   rest.set_id("1");
   rest.set_name("esp_kir_led");
 
-  server.begin();
+  server.begin(); //Запускам прослушивания запросов отпользователей
 }
 
+//Главный цыкл
 void loop() {
-  do_mode();
+  do_mode(); //Обработчик эффектов ленты
   WiFiClient client = server.available();
   if (client) {
-    if (client.available()) {
+    if (client.available()) { //Проверяем если есть клиент передаём его обработчику REST запросов
       rest.handle(client);
       delay(100);
     }
   }
-  yield();
-  if(reboot_flag == true)
+  yield();//Даём модулю исполнить свои подзадачи (по поддержанию wifi соединения)
+  if(reboot_flag == true)//Если установлен флаг перезапуска ребутаемся
     ESP.restart();
 }
 
@@ -271,36 +269,15 @@ uint32_t Wheel(byte WheelPos) {
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
-
-void update_started() {
+void update_started() {//Обновление начато
   Serial.println("CALLBACK:  HTTP update process started");
   fill_full(strip.Color(0, 0, 64), 0, numPixels_full());
   show_full();
 }
 
-void update_finished() {
-  Serial.println("CALLBACK:  HTTP update process finished");
-  fill_full(strip.Color(64, 128, 0), 0, numPixels_full());
-  show_full();
-
-}
-
-void update_progress(int cur, int total) {
-
-  fill_full(strip.Color(0, 128, 0), 0, map(cur, 0, total, 0, numPixels_full()));
-  show_full();
-  Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
-}
-
-void update_error(int err) {
-  fill_full(strip.Color(128, 0, 0), 0, numPixels_full());
-  show_full();
-  Serial.printf("CALLBACK:  HTTP update fatal error code %d\n", err);
-}
-
 void make_update() //Проверка и обновление в случае наличия
 {
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
+  if ((WiFiMulti.run() == WL_CONNECTED)) {//Проверяем что мы подключены к ТД
 
     WiFiClient client;
 
@@ -312,30 +289,25 @@ void make_update() //Проверка и обновление в случае н
     // value is used to put the LED on. If the LED is on with HIGH, that value should be passed
     ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
 
-    // Add optional callback notifiers
-    ESPhttpUpdate.onStart(update_started);
-    ESPhttpUpdate.onEnd(update_finished);
-    ESPhttpUpdate.onProgress(update_progress);
-    ESPhttpUpdate.onError(update_error);
-
+    //Задаём путь для обращения за обнавлениями
     t_httpUpdate_return ret = ESPhttpUpdate.update(client, "http://dev.a1mc.ru/rom/kir/index.php");
-    // Or:
-    //t_httpUpdate_return ret = ESPhttpUpdate.update(client, "server", 80, "file.bin");
 
-    switch (ret) {
-      case HTTP_UPDATE_FAILED:
+    ESPhttpUpdate.onStart(update_started);
+
+    switch (ret) { //Обработчик результата обнавлений
+      case HTTP_UPDATE_FAILED: //Ошибка обновления
         Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-        service_blink(strip.Color(255, 0, 0));
+        service_blink(strip.Color(255, 0, 0)); //Мигаем два раза красным сообщая пользователю о проблемме
         break;
 
-      case HTTP_UPDATE_NO_UPDATES:
+      case HTTP_UPDATE_NO_UPDATES: //Обнавления отсутствуют
         Serial.println("HTTP_UPDATE_NO_UPDATES");
         //service_blink(strip.Color(0, 0, 255));
         break;
 
-      case HTTP_UPDATE_OK:
+      case HTTP_UPDATE_OK://Обнавление успешно завершено
         Serial.println("HTTP_UPDATE_OK");
-        service_blink(strip.Color(0, 255, 0));
+        service_blink(strip.Color(0, 255, 0)); //Мигаем пользователю зелёным сообщая об успешном обновление
         break;
     }
   }
