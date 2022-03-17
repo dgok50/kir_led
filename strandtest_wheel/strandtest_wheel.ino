@@ -40,8 +40,8 @@ unsigned int global_mode = 1;
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(490, STR2, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(247, STR1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(492, STR2, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(247, STR1, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -73,9 +73,9 @@ void setup() {
   strip.begin();
   strip.setBrightness(255);
   strip.show(); // Initialize all pixels to 'off'
-  strip2.begin();
-  strip2.setBrightness(255);
-  strip2.show(); // Initialize all pixels to 'off'
+//  strip2.begin();
+//  strip2.setBrightness(255);
+//  strip2.show(); // Initialize all pixels to 'off'
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(APSSID, APPSK);
@@ -138,20 +138,20 @@ void colorWipe_inv(uint32_t c, uint8_t wait) {
   }
 }
 void setPixelColor_full(uint16_t i, uint32_t c){
-  if(i<strip.numPixels()){
-    strip.setPixelColor((strip.numPixels()-1)-i, c);
-  }
-  if(i>strip.numPixels())
-  {
-    strip2.setPixelColor(i-(strip.numPixels()+1), c);
-  }
+  //if(i<strip.numPixels()){
+    strip.setPixelColor(i, c);
+  //}
+  //if(i>strip.numPixels())
+  //{
+  //  strip2.setPixelColor(i-(strip.numPixels()+1), c);
+  //}
 }
 void show_full(){
     strip.show();
-    strip2.show();
+    //strip2.show();
 }
 unsigned int numPixels_full(){
- return strip.numPixels()+strip2.numPixels();
+ return strip.numPixels();
 }
 //
 //void colorWipe2(uint32_t c, uint8_t wait) {
@@ -254,16 +254,13 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if(WheelPos < 85) {
     return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-    return strip2.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
   if(WheelPos < 170) {
     WheelPos -= 85;
     return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-    return strip2.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-  return strip2.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
 
